@@ -359,6 +359,48 @@ public partial class DocumentGroup : DockContainer
         Root!.Behavior?.OnDocked(document, this, dockTarget);
     }
 
+    internal bool CanCloseOtherTabs(Document document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        return CanCloseTabs(document, static (index, currentIndex) => index != currentIndex);
+    }
+
+    internal bool CanCloseTabsToLeft(Document document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        return CanCloseTabs(document, static (index, currentIndex) => index < currentIndex);
+    }
+
+    internal bool CanCloseTabsToRight(Document document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        return CanCloseTabs(document, static (index, currentIndex) => index > currentIndex);
+    }
+
+    internal void CloseOtherTabs(Document document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        CloseTabs(document, static (index, currentIndex) => index != currentIndex);
+    }
+
+    internal void CloseTabsToLeft(Document document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        CloseTabs(document, static (index, currentIndex) => index < currentIndex);
+    }
+
+    internal void CloseTabsToRight(Document document)
+    {
+        ArgumentNullException.ThrowIfNull(document);
+
+        CloseTabs(document, static (index, currentIndex) => index > currentIndex);
+    }
+
     internal override void SaveLayout(JsonObject writer)
     {
         writer.WriteByModuleType(this);
@@ -380,6 +422,55 @@ public partial class DocumentGroup : DockContainer
         CompactTabs = reader[nameof(CompactTabs)].Deserialize<bool>();
         ShowWhenEmpty = reader[nameof(ShowWhenEmpty)].Deserialize<bool>();
         SelectedIndex = reader[nameof(SelectedIndex)].Deserialize<int>();
+    }
+
+    private bool CanCloseTabs(Document document, Func<int, int, bool> indexPredicate)
+    {
+        int currentIndex = Children.IndexOf(document);
+
+        return currentIndex is not -1
+            && Children.Cast<Document>().Any(item => item.CanClose && indexPredicate(Children.IndexOf(item), currentIndex));
+    }
+
+    private void CloseTabs(Document document, Func<int, int, bool> indexPredicate)
+    {
+        int currentIndex = Children.IndexOf(document);
+
+        if (currentIndex is -1)
+        {
+            return;
+        }
+
+        Document[] documents = Children.Cast<Document>()
+                                       .Where((item, index) => item.CanClose && indexPredicate(index, currentIndex))
+                                       .ToArray();
+
+        if (documents.Length is 0)
+        {
+            return;
+        }
+
+        DockManager? manager = Root;
+        bool activeDocumentWillClose = manager?.ActiveDocument is Document activeDocument && documents.Contains(activeDocument);
+
+        foreach (Document item in documents)
+        {
+            item.Detach();
+        }
+
+        if (manager is not null)
+        {
+            if (activeDocumentWillClose)
+            {
+                manager.ActiveDocument = Children.Contains(document)
+                    ? document
+                    : (SelectedIndex is not -1 ? (Document)Children[SelectedIndex] : null);
+            }
+
+            // In multi-window drag-and-drop operations, if the original window closes prematurely,
+            // it may lead to incorrect handling of the drop result.
+            FloatingWindowHelpers.CloseEmptyWindows(manager);
+        }
     }
 
     private void UpdateVisualState()

@@ -23,9 +23,9 @@ public partial class Document : DockModule
                                                                                            new PropertyMetadata(false));
 
     public static readonly DependencyProperty CanCloseProperty = DependencyProperty.Register(nameof(CanClose),
-                                                                                             typeof(bool),
-                                                                                             typeof(Document),
-                                                                                             new PropertyMetadata(false));
+                                                                                              typeof(bool),
+                                                                                              typeof(Document),
+                                                                                              new PropertyMetadata(false));
 
     private static readonly DependencyProperty ActualTitleProperty = DependencyProperty.Register(nameof(ActualTitle),
                                                                                                  typeof(string),
