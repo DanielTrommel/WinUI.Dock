@@ -359,47 +359,23 @@ public partial class DocumentGroup : DockContainer
         Root!.Behavior?.OnDocked(document, this, dockTarget);
     }
 
-    internal bool CanCloseOtherTabs(Document document)
-    {
-        ArgumentNullException.ThrowIfNull(document);
+    internal bool CanCloseOtherTabs(Document document) =>
+        CanCloseTabs(document, static (index, currentIndex) => index != currentIndex);
 
-        return CanCloseTabs(document, static (index, currentIndex) => index != currentIndex);
-    }
+    internal bool CanCloseTabsToLeft(Document document) =>
+        CanCloseTabs(document, static (index, currentIndex) => index < currentIndex);
 
-    internal bool CanCloseTabsToLeft(Document document)
-    {
-        ArgumentNullException.ThrowIfNull(document);
+    internal bool CanCloseTabsToRight(Document document) =>
+        CanCloseTabs(document, static (index, currentIndex) => index > currentIndex);
 
-        return CanCloseTabs(document, static (index, currentIndex) => index < currentIndex);
-    }
-
-    internal bool CanCloseTabsToRight(Document document)
-    {
-        ArgumentNullException.ThrowIfNull(document);
-
-        return CanCloseTabs(document, static (index, currentIndex) => index > currentIndex);
-    }
-
-    internal void CloseOtherTabs(Document document)
-    {
-        ArgumentNullException.ThrowIfNull(document);
-
+    internal void CloseOtherTabs(Document document) =>
         CloseTabs(document, static (index, currentIndex) => index != currentIndex);
-    }
 
-    internal void CloseTabsToLeft(Document document)
-    {
-        ArgumentNullException.ThrowIfNull(document);
-
+    internal void CloseTabsToLeft(Document document) =>
         CloseTabs(document, static (index, currentIndex) => index < currentIndex);
-    }
 
-    internal void CloseTabsToRight(Document document)
-    {
-        ArgumentNullException.ThrowIfNull(document);
-
+    internal void CloseTabsToRight(Document document) =>
         CloseTabs(document, static (index, currentIndex) => index > currentIndex);
-    }
 
     internal override void SaveLayout(JsonObject writer)
     {
@@ -435,7 +411,6 @@ public partial class DocumentGroup : DockContainer
     private void CloseTabs(Document document, Func<int, int, bool> indexPredicate)
     {
         int currentIndex = Children.IndexOf(document);
-
         if (currentIndex is -1)
         {
             return;
