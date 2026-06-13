@@ -8,6 +8,26 @@
              DropCompleted="OnDropCompleted"
              IsClosable="False"
              Style="{StaticResource TabViewItemStyle}">
+    <TabViewItem.Resources>
+        <x:String x:Key="CloseOthersMenuText">Close others</x:String>
+        <x:String x:Key="CloseAllLeftMenuText">Close others ←</x:String>
+        <x:String x:Key="CloseAllRightMenuText">Close others →</x:String>
+    </TabViewItem.Resources>
+
+    <TabViewItem.ContextFlyout>
+        <MenuFlyout Opening="TabContextMenu_Opening">
+            <MenuFlyoutItem x:Name="CloseOthersMenuItem"
+                            Click="CloseOthersMenuItem_Click"
+                            Text="{StaticResource CloseOthersMenuText}" />
+            <MenuFlyoutItem x:Name="CloseAllLeftMenuItem"
+                            Click="CloseAllLeftMenuItem_Click"
+                            Text="{StaticResource CloseAllLeftMenuText}" />
+            <MenuFlyoutItem x:Name="CloseAllRightMenuItem"
+                            Click="CloseAllRightMenuItem_Click"
+                            Text="{StaticResource CloseAllRightMenuText}" />
+        </MenuFlyout>
+    </TabViewItem.ContextFlyout>
+
     <TabViewItem.Header>
         <Grid x:Name="Tab"
               Padding="12,2,8,2"

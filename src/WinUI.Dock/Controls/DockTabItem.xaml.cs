@@ -109,6 +109,42 @@ public sealed partial class DockTabItem : TabViewItem
         Document!.Root!.ActiveDocument = Document;
     }
 
+    private void TabContextMenu_Opening(object _, object __)
+    {
+        if (Document?.Owner is not DocumentGroup group)
+        {
+            return;
+        }
+
+        CloseOthersMenuItem.IsEnabled = group.CanCloseOtherTabs(Document);
+        CloseAllLeftMenuItem.IsEnabled = group.CanCloseTabsToLeft(Document);
+        CloseAllRightMenuItem.IsEnabled = group.CanCloseTabsToRight(Document);
+    }
+
+    private void CloseOthersMenuItem_Click(object _, RoutedEventArgs __)
+    {
+        if (Document?.Owner is DocumentGroup group)
+        {
+            group.CloseOtherTabs(Document);
+        }
+    }
+
+    private void CloseAllLeftMenuItem_Click(object _, RoutedEventArgs __)
+    {
+        if (Document?.Owner is DocumentGroup group)
+        {
+            group.CloseTabsToLeft(Document);
+        }
+    }
+
+    private void CloseAllRightMenuItem_Click(object _, RoutedEventArgs __)
+    {
+        if (Document?.Owner is DocumentGroup group)
+        {
+            group.CloseTabsToRight(Document);
+        }
+    }
+
     private void Pin_Click(object _, RoutedEventArgs __)
     {
         DockManager manager = Document!.Root!;
